@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Security Camera App</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Security Camera App</h1>
+    <div class="actions">
+      <button id="openFolderBtn" class="btn">Open Folder</button>
+      <button id="loginBtn" class="btn">Login</button>
+      <button id="signupBtn" class="btn primary">Sign Up</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card">
+      <h2>Camera</h2>
+
+      <div class="row">
+        <button id="startCamBtn" class="btn primary">Start Camera</button>
+        <button id="stopCamBtn" class="btn">Stop Camera</button>
+        <button id="toggleCvBtn" class="btn">Toggle CV Filter</button>
+        <span id="status" class="status">Waiting for OpenCV…</span>
+      </div>
+
+      <div class="videoGrid">
+        <div class="panel">
+          <h3>Raw</h3>
+          <video id="video" autoplay playsinline muted></video>
+          <div class="smallHint">This is your real webcam feed.</div>
+        </div>
+
+        <div class="panel">
+          <h3>OpenCV Output</h3>
+          <canvas id="canvas"></canvas>
+          <div class="smallHint">This shows OpenCV processing (edges) when enabled.</div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <label class="label">
+          Preferred Camera:
+          <select id="cameraSelect" class="select">
+            <option value="">(default)</option>
+          </select>
+        </label>
+        <span class="tip">If you have multiple cameras, pick one then click Start Camera.</span>
+      </div>
+
+      <p class="hint">
+        If the camera won’t start: allow camera permission for <b>localhost</b>, and close Discord/OBS/Zoom if they’re using your webcam.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Log</h2>
+      <pre id="log"></pre>
+    </section>
+  </main>
+
+  <!-- OpenCV.js (runs in the browser) -->
+  <script async src="https://docs.opencv.org/4.x/opencv.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
