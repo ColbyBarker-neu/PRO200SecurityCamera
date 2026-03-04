@@ -3,6 +3,7 @@ dotenv.config();
 
 import { createClient, SCHEMA_FIELD_TYPE } from "redis";
 
+
 // client is defined via a .env file that isn't uploaded
 // to github
 const client = createClient({
@@ -47,7 +48,7 @@ const setup = async () => {
     }
   }, {
     ON: 'HASH',
-    PREFIX: 'img:usr:'
+    PREFIX: 'img:'
   }
 }
 /*
@@ -63,7 +64,7 @@ const setup = async () => {
 }
 */
 
-class accessRedis{
+export class accessRedis{
   static async addUser(username, HashedPassword,email) {
     await client.hSet(`usr:${username}`,{
       'username': username,
@@ -89,12 +90,37 @@ class accessRedis{
     imageSet.username = username
     imageSet.imgdata = imgdata
     imageSet.filename = filename
-    await client.hSet(`img:usr:${username}`,imageSet)
+    await client.hSet(`img:${username}:${filename}`,imageSet)
+  }
+  static async getUser(username) {
+    return await client.hGetAll(`usr:${username}`)
+  }
+  static async getImage(username, filename) {
+    return await client.hGetAll(`img:${username}:${filename}`)
+  }
+  static async removeUser(username) {
+    await client.del(`usr:${username}`)
+  }
+  static async removeImage(username, filename) {
+    await client.del(`img:${username}:${filename}`)
+  }
+  static async updateUser(username, newData) {    //TODO: Test update functions
+    if (getUser(username) === null) return
+    removeUser(username)
+    addUser(newData)
+  }
+  static async updateImage(username, filename, newData) {
+    if (getImage(username, filename) === null) return
+    removeImage(username,filename)
+    addImage(username, newData, filename)
   }
 }
 
 //test functions, accessRedis can only be used after redis connects
+/*
 accessRedis.addUser('JohnDoe', 'Jane', 'John@outlook.com')
 accessRedis.addUser('user1','password1','email1')
 accessRedis.addImage('user1', 'placeholder data', 'image.png')
+accessRedis.addImage('user1', 'placeholder data', 'image2.png')
 console.log('data added')
+*/

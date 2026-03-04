@@ -1,5 +1,6 @@
 const path = require("path");
 const express = require("express");
+const db = import("./database.js"); //Link to enable access to the redis database, accessRedis should handle CRUD operations
 
 const app = express();
 const PORT = process.env.PORT || 3000;
