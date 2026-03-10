@@ -50,6 +50,8 @@ let useFilter = true;
 let stream = null;
 let rafId = null;
 
+
+
 function setStatus(text) {
   statusEl.textContent = text;
 }
@@ -96,7 +98,7 @@ async function startCamera() {
       audio: false,
       video: deviceId
         ? { deviceId: { exact: deviceId } }
-        : { facingMode: "user" } 
+        : { facingMode: "user" }
     };
 
     setStatus("Starting camera…");
@@ -162,13 +164,30 @@ function waitForCv() {
   }, 100);
 }
 
-function startProcessingLoop() {
+async function startProcessingLoop() {
   if (!cvReady) {
     log("OpenCV not ready yet—processing loop will still show raw video.");
   }
-
   const ctx = canvas.getContext("2d");
+  // Extra OpenCV variables
+  let faces = new cv.RectVector();
+  let gray = new cv.Mat();
+  let classifier = new cv.CascadeClassifier();
+  let src = new cv.Mat(video.height, video.width, cv.CV_8UC4)
+  let xml = ''
 
+  await fetch('./haarcascade_frontalface_default.xml')
+    .then((res) => res.text())
+    .then((text) => {
+      classifier.load(text)
+      console.log(text)
+    })
+    .catch((e)=>console.error(e))
+
+  //console.log("Loaded",classifier)
+  //
+
+  /*
   const tick = () => {
     rafId = requestAnimationFrame(tick);
 
@@ -197,6 +216,47 @@ function startProcessingLoop() {
       dst.delete();
     }
   };
+  */
+  const tick = () => {
+    try{
+      rafId = requestAnimationFrame(tick);
+
+      if (!video || video.readyState < 2) return;
+
+      if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        log(`Canvas sized: ${canvas.width}x${canvas.height}`);
+      }
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      if (!cvReady || !useFilter) return;
+
+      const src = cv.imread(canvas);
+      const dst = new cv.Mat();
+
+      try {
+        cv.cvtColor(dst, gray, cv.COLOR_RGBA2GRAY, 0);
+        classifier.detectMultiScale(gray, faces, 1.1, 3, 0);
+        for (let i = 0; i < faces.size(); i++){
+          let face = faces.get(i);
+          let pt1 = new cv.Point(face.x, face.y);
+          let pt2 = new cv.Point(face.x + face.width, face.y + face.height);
+          cv.rectangle(dst,pt1,pt2)
+        }
+        cv.imshow(canvas,dst)
+      } finally {
+        src.delete();
+        dst.delete();
+      }
+    } catch (e) {
+
+    }
+
+
+
+  }
 
   tick();
 }
