@@ -1,7 +1,6 @@
 const path = require("path");
 const express = require("express");
-//const db = require("./database.js"); //Link to enable access to the redis database, accessRedis should handle CRUD operations
-//const cv = require("./opencv.js")
+const db = require("./database.js"); //Link to enable access to the redis database, accessRedis should handle CRUD operations
 const fs = require("fs")
 
 const app = express();

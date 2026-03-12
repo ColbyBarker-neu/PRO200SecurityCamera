@@ -1,70 +1,73 @@
-const dotenv  = require("dotenv");
+const dotenv = require("dotenv");
 dotenv.config();
 
-import { createClient, SCHEMA_FIELD_TYPE } from "redis";
+const redis = require("redis");
 
 
-// client is defined via a .env file that isn't uploaded
-// to github
-const client = createClient({
-  url: process.env.REDIS_URL+process.env.REDIS_HOST,
-  socket: {
-    tls: false,
-    servername: process.env.REDIS_HOST,
-  },
-});
-
-client.on("error", (err) => {
-  console.error("Redis Error:", err);
-});
-
-await client.connect();
-console.log("connected to redis!")//not needed
-
-const setup = async () => {
-  await client.ft.create('account_dat', {
-    'username': {
-      type: SCHEMA_FIELD_TYPE.TEXT,
+async function main() {
+  // client is defined via a .env file that isn't uploaded
+  // to github
+  const client = createClient({
+    url: process.env.REDIS_URL + process.env.REDIS_HOST,
+    socket: {
+      tls: false,
+      servername: process.env.REDIS_HOST,
     },
-    'email': {
-      type: SCHEMA_FIELD_TYPE.TEXT,
-    },
-    'password': {
-      type: SCHEMA_FIELD_TYPE.TEXT,
+  });
+
+  client.on("error", (err) => {
+    console.error("Redis Error:", err);
+  });
+
+  await client.connect();
+
+  const setup = async () => {
+    await client.ft.create('account_dat', {
+      'username': {
+        type: SCHEMA_FIELD_TYPE.TEXT,
+      },
+      'email': {
+        type: SCHEMA_FIELD_TYPE.TEXT,
+      },
+      'password': {
+        type: SCHEMA_FIELD_TYPE.TEXT,
+      }
+    }, {
+      ON: 'HASH',
+      PREFIX: 'usr:'
+    })
+    await client.ft.create('image_dat'), {
+      'username': {
+        type: SCHEMA_FIELD_TYPE.TEXT,
+      },
+      'imgdata': {
+        type: SCHEMA_FIELD_TYPE.TEXT,
+      },
+      'filename': {
+        type: SCHEMA_FIELD_TYPE.TEXT,
+      }
+    }, {
+      ON: 'HASH',
+      PREFIX: 'img:'
     }
-  }, {
-    ON: 'HASH',
-    PREFIX: 'usr:'
-  })
-  await client.ft.create('image_dat'), {
-    'username': {
-      type: SCHEMA_FIELD_TYPE.TEXT,
-    },
-    'imgdata': {
-      type: SCHEMA_FIELD_TYPE.TEXT,
-    },
-    'filename': {
-      type:SCHEMA_FIELD_TYPE.TEXT,
-    }
-  }, {
-    ON: 'HASH',
-    PREFIX: 'img:'
   }
+  /*
+  ,
+  //VectorAlgorithms used in example, imported from @xenova/transformers - used for encryption
+  //example: https://redis.io/docs/latest/develop/clients/nodejs/vecsearch/
+  'embedding': {
+    type: SCHEMA_FIELD_TYPE.VECTOR,
+    TYPE: 'FLOAT32',
+    ALGORITHM: VectorAlgorithms.HNSW,
+    DISTANCE_METRIC: 'L2',
+    DIM: 768,
+  }
+  */
 }
-/*
-,
-//VectorAlgorithms used in example, imported from @xenova/transformers - used for encryption
-//example: https://redis.io/docs/latest/develop/clients/nodejs/vecsearch/
-'embedding': {
-  type: SCHEMA_FIELD_TYPE.VECTOR,
-  TYPE: 'FLOAT32',
-  ALGORITHM: VectorAlgorithms.HNSW,
-  DISTANCE_METRIC: 'L2',
-  DIM: 768,
-}
-*/
 
-export class accessRedis{
+main();
+
+class accessRedis{
   static async addUser(username, HashedPassword,email) {
     await client.hSet(`usr:${username}`,{
       'username': username,

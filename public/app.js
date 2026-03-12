@@ -181,11 +181,6 @@ async function startProcessingLoop() {
   let cap = new cv.VideoCapture(video);
   let xml = ''
 
-
-  const FPS = 30;
-  console.log("initialization finished")
-
-
   await fetch('./haarcascade_frontalface_default.xml')
     .then((res) => res.text())
     .then((text) => {
@@ -210,19 +205,25 @@ async function startProcessingLoop() {
 
     cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
     classifier.detectMultiScale(gray, faces, 1.1, 3, 0);
-    for (let i = 0; i < faces.size(); i++){
-      let face = faces.get(i);
-      let pt1 = new cv.Point(face.x, face.y);
-      let pt2 = new cv.Point(face.x + face.width, face.y + face.height);
-      cv.rectangle(src, pt1, pt2, [255,0,0,255], 2)
+    if (faces.size() > 1) {
+      /*
+      Here is where the code would go
+      to make an api call and send video data
+      over to the database
+      */
+      for (let i = 0; i < faces.size(); i++){
+        let face = faces.get(i);
+        let pt1 = new cv.Point(face.x, face.y);
+        let pt2 = new cv.Point(face.x + face.width, face.y + face.height);
+        cv.rectangle(src, pt1, pt2, [255,0,0,255], 2)
 
+      }
     }
     cv.imshow(canvas, src)
 
     requestAnimationFrame(tick)
   }
 
-  console.log("starting loop:")
   tick();
 }
 
