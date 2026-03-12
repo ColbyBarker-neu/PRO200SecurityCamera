@@ -10,10 +10,9 @@ Note that the database is restricted and you may need to create your own redis d
 To run this program, run an `npm update` to ensure all dependencies are loaded, then just run `npm start` within the project's directory and open up the localhost link provided in the terminal.
 
 The program uses a .env file in the root directory in order to handle access to the redis database- basic setup is:
-``
-REDIS_URL=redis://{database_name}:{password}
-REDIS_HOST=localhost/{IP_address}:{port}
-``
+`REDIS_URL=redis://{database_name}:{password}`
+`REDIS_HOST=localhost/{IP_address}:{port}`
+
 
 ## Known issues
 Currently the program is only capable of detecting faces, but not storing any image data to the connected database.
